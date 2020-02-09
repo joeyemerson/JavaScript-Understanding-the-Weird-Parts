@@ -168,7 +168,7 @@ greet2(); // 'Hello <Your name here>' (name will be assigned whatever value coer
 ```
 
 ## Default Values in Frameworks
-### Example
+### index.html
 ```html
 <html>
     <head>
@@ -181,16 +181,17 @@ greet2(); // 'Hello <Your name here>' (name will be assigned whatever value coer
 </html>
 ```
 
-### Lib1
+### lib1.js
 ```javascript
 var libraryName = 'Lib 1';
 ```
 
-### Lib2
+### lib2.js
 ```javascript
 var libraryName = 'Lib 2';
 ```
 
+### app.js
 ```javascript
 console.log(libraryName);
 ```
