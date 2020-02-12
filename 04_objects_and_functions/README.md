@@ -420,5 +420,258 @@ var greeting;
 console.log(greeting); // 'Hola'
 ```
 
+## Understanding Closures
+```js
+// start off in the global execution context
+function greet(whatToSay) {
+
+  return function(name) {
+    console.log(`${whatToSay} ${name}`);
+  }
+
+}
+
+// a new execution context is created for greet()
+// whatToSay is in its variable environmet
+// creates function on the fly and returns it
+var sayHi = greet('Hi');
+
+// greet() execution context is popped off the stack
+// back to global execution context
+
+// invoke sayHi(), anonymous function, creating a new execution context
+// when it looks for whatToSay, it looks down the scope chain
+
+// greet()'s execution context is gone, but what's in memory for that
+// execution context is not
+
+// JavaScript makes sure the function can go find the variable
+// the execution context has "closed in" its variables it needs access to
+// it keeps the scope intact
+
+sayHi('Tony'); // 'Hi Tony'
+```
+
+```js
+function buildFunctions() {
+  var arr = [];
+
+  for (var i = 0; i < 3; i++) {
+    arr.push(
+      function () {
+        console.log(i);
+      }
+    );
+  }
+
+  return arr;
+}
+
+// buildFunctions() has new execution context with variables
+// value of i is 3 when the return statement is reached
+// i increments a final time before the evaluation statement is run
+var fs = buildFunctions();
+
+fs[0](); // 3
+fs[1](); // 3
+fs[2](); // 3
+```
+
+### What if we want it to run correctly (ES5)?
+```js
+function buildFunctions2() {
+  var arr = [];
+
+  for (var i = 0; i < 3; i++) {
+    arr.push(
+      (function(j) {
+        return function() {
+          console.log(j);
+        }
+      }(i))
+    );
+  }
+
+  return arr;
+}
+
+var fs2 = buildFunctions2();
+
+fs2[0](); // 0
+fs2[1](); // 1
+fs2[2](); // 2
+```
+
+### What if we want it to run correctly (ES6)?
+```js
+function buildFunctions3() {
+  var arr = [];
+
+  // use let to declare i and it will be block scoped
+  for (let i = 0; i < 3; i++) {
+    arr.push(
+      function () {
+        console.log(i);
+      }
+    );
+  }
+
+  return arr;
+}
+
+// buildFunctions() has new execution context with variables
+// value of i is 3 when the return statement is reached
+// i increments a final time before the evaluation statement is run
+var fs3 = buildFunctions3();
+
+fs3[0](); // 0
+fs3[1](); // 1
+fs3[2](); // 2
+```
+
+## Function Factories
+Everytime you call a function with a closure, a new execution context is created.
+
+### Example
+```js
+function makeGreeting(language) {
+
+  return function(name) {
+
+    if (language === 'en') {
+      console.log('Hello ' + name);
+    }
+
+    if (language === 'es') {
+      console.log('Hola ' + name);
+    }
+
+  }
+
+}
+
+var greetEnglish = makeGreeting('en');
+var greetSpanish = makeGreeting('es');
+
+greetEnglish('Joey');
+greetSpanish('Joey');
+```
+
+## Closures and Callbacks
+Because of closures, the 'greeting' variable below is available 3 seconds later when the setTimeout function is run.
+
+```js
+function sayHiLater() {
+
+  var greeting = 'Hi!';
+
+  setTimeout(function() {
+    console.log(greeting);
+  }, 3000)
+
+}
+
+sayHiLater();
+```
+
+**Callback Function**: A function you give to another function, to be run when the other function is finished. So the function you call (i.e. invoke), 'calls back' by calling the function you gave it when it finishes.
+
+## call(), apply(), and bind()
+All functions have access to call, apply, and bind methods.
+
+```js
+var person = {
+  fname: 'John',
+  lname: 'Doe',
+  getFullName: function() {
+    var fullName = this.fname + ' ' + this.lname;
+    return fullName;
+  }
+}
+
+var logName = function(lang1, lang2) {
+  console.log('Logged: ' + this.getFullName());
+  console.log('Arguments: ' + lang1 + ' ' + lang2);
+}
+
+// bind() creates a copy of whatever function you attach to it.
+var logPersonName = logName.bind(person);
+
+logPersonName('en'); // 'Logged: John Doe'
+                     // 'en undefined'
+
+// call() lets you control where 'this' is pointing to along with calling the function
+logName.call(person, 'en', 'es'); // 'Logged: John Doe'
+                                  // 'en es'
+
+// apply() takes an array of parameters, which is the only difference between it and call()
+logName.apply(person, ['en', 'es']); // 'Logged: John Doe'
+                                     // 'en es'
+
+
+// function borrowing
+var person2 = {
+  fname: 'Jane',
+  lname: 'Doe'
+}
+
+console.log(person.getFullName.apply(person2)); // 'Jane Doe'
+
+// function currying
+function multiply(a, b) {
+  return a * b;
+}
+
+// passing parameters using bind will set permanent values for those parameters
+var multiplyByTwo = multiply.bind(this, 2);
+var multiplyByThree = multiply.bind(this, 3);
+
+console.log(multiplyByTwo(9)); // 18
+console.log(multiplyByThree(9)); // 27
+```
+
+## Functional Programming
+```js
+function mapForEach(arr, fn) {
+  var newArr = [];
+  for (var i=0; i < arr.length; i++) {
+  	newArr.push(
+  		fn(arr[i])
+    );
+  }
+  return newArr;
+}
+
+var arr1 = [1,2,3];
+console.log(arr1);
+
+var arr2 = mapForEach(arr1, function(item) {
+  return item * 2;
+});
+console.log(arr2); // [2, 4, 6]
+
+var arr3 = mapForEach(arr1, function(item) {
+  return item > 2;
+});
+console.log(arr3); // [false, false, true]
+
+var checkPastLimit = function(limiter, item) {
+  return item > limiter;
+}
+
+var arr4 = mapForEach(arr1, checkPastLimit.bind(this, 1));
+console.log(arr4); // [false, true, true]
+
+var checkPastLimitSimplified = function(limiter) {
+  return function(limiter, item) {
+    return item > limiter;
+  }.bind(this, limiter);
+};
+
+var arr5 = mapForEach(arr1, checkPastLimitSimplified(2));
+console.log(arr5); // [false, false, true]
+```
+
+Small functions that are passed around should not mutate data.
 
 [//]: # (comments go here)
