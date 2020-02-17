@@ -7,5 +7,6 @@ These are my course notes and files. Completed February 16, 2020.
 1. Object-Oriented Javascript and Prototypal Inheritance
 1. Building Objects
 1. Odds and Ends
-1. Let's Build a Framework / Library!
 1. BONUS Lectures
+
+Greetr is the mini library built in the course putting many of the concepts learned to use.
