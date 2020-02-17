@@ -10,5 +10,4 @@ A JavaScript library to help give greetings.
 * Easy to type 'G$()' structure
 * Support jQuery
 
-## To Do
-Refactor to ES6 variable, class, and function syntax.
+After completing the course, I rewrote Greetr with ES6 variable, function, and class syntax.
